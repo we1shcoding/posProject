@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.Objects;
 import java.util.Scanner;
 
 class Purchase {
@@ -24,6 +25,25 @@ class Purchase {
 
 	public int getQuantity() {
 		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Purchase purchase = (Purchase) o;
+		return Objects.equals(productId, purchase.productId);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(productId);
 	}
 }
 
@@ -300,36 +320,35 @@ public class number extends Pos {
 				int 유통기한 = rs.getInt("유통기한");
 				// 가져온 데이터 출력
 				System.out.println("제품ID: " + 제품id + ", 가격: " + 가격 + "원, 재고: " + 재고 + "개, 유통기한: " + 유통기한 + "시간");
-
 			}
 
 			// 여러 제품 구매 과정
 			while (true) {
-				System.out.print("구매할 제품의 ID를 입력하시오 :");
+				System.out.print("구매할 제품의 ID를 입력하시오: ");
 				String productId = scanner.next();
 
 				if (productId.equals("소주") || productId.equals("담배")) {
 					check5_3(conn);
 				}
 
-				System.out.print("구매할 제품의 수량을 입력하시오 :");
+				System.out.print("구매할 제품의 수량을 입력하시오: ");
 				int quantity = scanner.nextInt();
 
-				System.out.print("카드 번호를 입력해주세요 (16자리) : ");
+				System.out.print("카드 번호를 입력해주세요 (16자리): ");
 				String cardNumberInput;
 				while (true) {
 					cardNumberInput = scanner.next();
 					if (cardNumberInput.length() == 16) {
 						break; // 올바른 길이의 카드 번호가 입력될 때까지 반복
 					} else {
-						System.out.print("카드 번호를 16자리로 다시 입력해주세요 :");
+						System.out.print("카드 번호를 16자리로 다시 입력해주세요: ");
 					}
 				}
 
 				// 입력한 카드 번호에 하이픈 추가
 				String formattedCardNumber = formatCardNumber(cardNumberInput);
 
-				System.out.println("카드 번호 : " + formattedCardNumber);
+				System.out.println("카드 번호: " + formattedCardNumber);
 
 				// 제품 가격과 재고 확인
 				sql = "SELECT 가격, 재고 FROM items WHERE 제품id = '" + productId + "'";
@@ -357,7 +376,7 @@ public class number extends Pos {
 					// 초기 카드 잔액 설정
 					int cardBalance = 10000; // 초기 잔액을 10,000원으로 설정
 
-					System.out.println("카드 잔액 : " + cardBalance + "원");
+					System.out.println("카드 잔액: " + cardBalance + "원");
 
 					if (cardBalance < totalAmount) {
 						System.out.println("카드 잔액이 부족합니다. 구매를 중단합니다.");
@@ -374,10 +393,10 @@ public class number extends Pos {
 					sql = "UPDATE items SET 재고 = " + newStock + " WHERE 제품id = '" + productId + "'";
 					stmt.executeUpdate(sql);
 
-					System.out.println("거래가 완료되었습니다.\n거스름돈 : " + change + "원");
-					System.out.println("잔고 : " + balance + "원");
-					System.out.println("매출액 : " + revenue + "원");
-					System.out.println("남은 재고 : " + newStock + "개");
+					System.out.println("거래가 완료되었습니다.\n거스름돈: " + change + "원");
+					System.out.println("잔고: " + balance + "원");
+					System.out.println("매출액: " + revenue + "원");
+					System.out.println("남은 재고: " + newStock + "개");
 
 					// 다른 제품을 구매할지 묻는 구문
 					System.out.println("다른 제품을 구매하겠습니까? (1. 예 | 2. 아니오)");
@@ -404,64 +423,116 @@ public class number extends Pos {
 		StringBuilder formatted = new StringBuilder();
 		formatted.append(cardNum.substring(0, 4)).append("-");
 		formatted.append(cardNum.substring(4, 8)).append("-");
-		formatted.append(cardNum.substring(8, 16)).append("");
+		formatted.append(cardNum.substring(8, 12)).append("-");
+		formatted.append(cardNum.substring(12, 16));
 		return formatted.toString();
 	}
 
 	// 제품 환불
 	private static void check5_2(Connection conn) throws SQLException {
 		Scanner scanner = new Scanner(System.in);
-		System.out.println("환불할 제품의 ID를 입력하시오 :");
-		String productId = scanner.next();
 
-		System.out.println("환불할 제품의 수량을 입력하시오 :");
-		int quantity = scanner.nextInt();
+		while (true) {
+			System.out.println("환불할 물건의 제품ID와 수량을 입력하세요.");
+			System.out.print("제품ID: ");
+			String productId = scanner.nextLine();
 
-		try {
-			// SQL 쿼리 실행을 위한 Statement 객체 생성
-			Statement stmt = conn.createStatement();
-
-			// 해당 제품의 가격과 재고를 가져오기 위한 쿼리
-			String sql = "SELECT 가격, 재고 FROM items WHERE 제품id = '" + productId + "'";
-			ResultSet rs = stmt.executeQuery(sql);
-
-			if (rs.next()) {
-				int price = rs.getInt("가격");
-				int stock = rs.getInt("재고");
-
-				if (quantity > stock) {
-					System.out.println("환불이 불가능합니다. 구입했던 개수보다 많은 수를 입력했습니다.");
-					returnMenu(conn);
-					return;
+			System.out.print("수량: ");
+			int quantity;
+			try {
+				quantity = Integer.parseInt(scanner.nextLine());
+				if (quantity <= 0) {
+					throw new InputMismatchException();
 				}
-
-				// 환불할 금액 계산
-				int refundAmount = price * quantity;
-
-				// 현재 잔고에 환불할 금액을 추가
-				balance += refundAmount;
-				System.out.println("환불 금액 : " + refundAmount + "원");
-				System.out.println("현재 잔고 : " + balance + "원");
-
-				// 데이터베이스에서 재고를 업데이트
-				int newStock = stock + quantity; // 환불되는 제품 수량만큼 재고를 증가시킴
-				String updateSql = "UPDATE items SET 재고 = " + newStock + " WHERE 제품id = '" + productId + "'";
-				stmt.executeUpdate(updateSql);
-
-				System.out.println("재고가 업데이트 되었습니다. 새로운 재고 : " + newStock + "개");
-
-				// 메뉴로 돌아가기
-				returnMenu(conn);
-			} else {
-				System.out.println("해당 제품이 존재하지 않습니다.");
+			} catch (InputMismatchException e) {
+				System.out.println("유효하지 않은 입력입니다. 양의 정수 수량을 입력하세요.");
+				if (askRetry(scanner))
+					continue;
+				else
+					return;
 			}
 
-			// 연결된 자원 닫기
-			rs.close();
-			stmt.close();
-		} catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
+			// 구매 내역에서 제품을 찾기
+			Purchase foundPurchase = null;
+			for (Purchase purchase : purchases) {
+				if (purchase.getProductId().equals(productId)) {
+					foundPurchase = purchase;
+					break;
+				}
+			}
+
+			if (foundPurchase == null) {
+				System.out.println("구매했던 제품이 아닙니다. 환불이 불가능합니다.");
+				if (askRetry(scanner))
+					continue;
+				else
+					return;
+			}
+
+			if (foundPurchase.getQuantity() < quantity) {
+				System.out.println("환불 수량이 구매 수량을 초과합니다.");
+				if (askRetry(scanner))
+					continue;
+				else
+					return;
+			}
+
+			// 환불 처리 로직
+			try {
+				Statement stmt = conn.createStatement();
+				String checkStockSql = "SELECT 재고, 가격 FROM items WHERE 제품id = '" + productId + "'";
+				ResultSet rs = stmt.executeQuery(checkStockSql);
+
+				if (rs.next()) {
+					int stock = rs.getInt("재고");
+					int price = rs.getInt("가격");
+
+					// 재고 업데이트
+					int newStock = stock + quantity;
+					String updateStockSql = "UPDATE items SET 재고 = " + newStock + " WHERE 제품id = '" + productId + "'";
+					stmt.executeUpdate(updateStockSql);
+
+					// 잔고 업데이트
+					int totalPrice = price * quantity;
+					balance -= totalPrice;
+					revenue -= totalPrice;
+
+					// 구매 내역 업데이트
+					foundPurchase.setQuantity(foundPurchase.getQuantity() - quantity);
+					if (foundPurchase.getQuantity() == 0) {
+						purchases.remove(foundPurchase);
+					}
+
+					System.out.println("환불 완료. 환불 금액: " + totalPrice + "원, 현재 잔고: " + balance + "원");
+					// 다른 제품을 환불할지 묻는 구문
+					System.out.println("다른 제품도 환불하겠습니까? (1. 예 | 2. 아니오)");
+					int refundAnother = scanner.nextInt();
+					scanner.nextLine(); // 버퍼 비우기
+					if (refundAnother == 1) {
+						continue; // 반복문으로 돌아가 다른 제품 환불 과정을 진행
+					} else {
+						returnMenu(conn);
+						break; // 반복문 탈출
+					}
+				} else {
+					System.out.println("존재하지 않는 제품ID입니다.");
+				}
+
+				rs.close();
+				stmt.close();
+			} catch (SQLException ex) {
+				System.out.println("SQLException: " + ex.getMessage());
+			}
+
+			break;
 		}
+	}
+
+	private static boolean askRetry(Scanner scanner) {
+		System.out.print("환불을 다시 진행하시겠습니까? (1. 예 | 2. 아니오): ");
+		int answer = scanner.nextInt();
+		scanner.nextLine(); // 버퍼 정리
+		return answer == 1;
 	}
 
 	// 미성년자 판매 금지 물품 체크
