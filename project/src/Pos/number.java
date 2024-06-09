@@ -63,7 +63,7 @@ public class number extends Pos {
 		System.out.println("[3] 매출액");
 		System.out.println("[4] 유통기한 체크");
 		System.out.println("[5] 업무 시작");
-		System.out.println("[6] 재고, 잔고 초기화");
+		System.out.println("[6] 재고, 잔고, 유통기한 초기화");
 		System.out.println("[7] 프로그램 종료");
 		System.out.println("-----------------");
 		// 사용자 선택 입력 받기
@@ -151,7 +151,13 @@ public class number extends Pos {
 			stmt.executeUpdate(resetSql);
 			balance = BASIC_BALANCE;
 
-			System.out.println("재고와 잔고가 초기값으로 되돌려졌습니다.");
+			String resetExpirationSql = "UPDATE items SET 유통기한 = CASE " + "WHEN 제품id = '우유' THEN 24 "
+					+ "WHEN 제품id = '두부' THEN 24 " + "WHEN 제품id = '오뎅' THEN 1 " + "WHEN 제품id = '초콜릿' THEN 5 "
+					+ "WHEN 제품id = '삼각김밥' THEN 10 " + "WHEN 제품id = '포카리' THEN 15 " + "WHEN 제품id = '담배' THEN 24 "
+					+ "WHEN 제품id = '소주' THEN 24 " + "WHEN 제품id = '라면' THEN 8 " + "WHEN 제품id = '햇반' THEN 10 " + "END";
+			stmt.executeUpdate(resetExpirationSql);
+
+			System.out.println("재고와 잔고와 유통기한이 초기값으로 되돌려졌습니다.");
 			printMenu(conn);
 			// 연결된 자원 닫기
 			stmt.close();
@@ -308,6 +314,8 @@ public class number extends Pos {
 	// 제품 판매
 	private static void check5_1(Connection conn) throws SQLException {
 		Scanner scanner = new Scanner(System.in);
+		ExpirationUpdater updater = new ExpirationUpdater(conn);
+		updater.reduceExpirationTimes();
 
 		try {
 			// SQL 쿼리 실행을 위한 Statement 객체 생성
@@ -321,10 +329,13 @@ public class number extends Pos {
 			System.out.println("현재 제품 목록:");
 			while (rs.next()) {
 				// 각 열의 값을 가져옴
+
 				String 제품id = rs.getString("제품id");
 				int 가격 = rs.getInt("가격");
 				int 재고 = rs.getInt("재고");
 				int 유통기한 = rs.getInt("유통기한");
+				ArrayList<Integer> expirationTimes = new ArrayList<>();
+				expirationTimes.add(유통기한);
 				// 가져온 데이터 출력
 				System.out.println("제품ID: " + 제품id + ", 가격: " + 가격 + "원, 재고: " + 재고 + "개, 유통기한: " + 유통기한 + "시간");
 			}
@@ -364,16 +375,10 @@ public class number extends Pos {
 				if (rs.next()) {
 					int 가격 = rs.getInt("가격");
 					int 재고 = rs.getInt("재고");
-					int 유통기한 = rs.getInt("유통기한");
-
-					if (유통기한 <= 0) {
-						System.out.println("유통기한이 지나 구매가 불가능한 제품입니다.");
-						returnMenu(conn);
-						break;
-					}
 
 					if (quantity > 재고) {
-						System.out.println(productId + "(이)가 품절되어 구매할 수 없습니다. 다른 제품을 구매하시겠습니까? (1. 예 | 2. 아니오)");
+						System.out.println(
+								productId + "(이)가 품절되었거나 유통기한이 지나 구매할 수 없습니다.\n다른 제품을 구매하시겠습니까? (1. 예 | 2. 아니오)");
 						int answer = scanner.nextInt();
 						if (answer == 1) {
 							continue; // 다른 제품을 구매하기 위해 반복문을 계속 진행
