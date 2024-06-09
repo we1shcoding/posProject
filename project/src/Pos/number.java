@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.Timer;
 
 class Purchase {
 	private String productId;
@@ -52,6 +53,7 @@ public class number extends Pos {
 	protected static int balance = BASIC_BALANCE; // 현재 잔고
 	protected static int revenue = 0; // 매출액
 	protected static ArrayList<Purchase> purchases = new ArrayList<>();
+	protected static Timer expirationTimer = new Timer();
 
 	// 메뉴 표시
 	private static void Menu() {
@@ -74,6 +76,11 @@ public class number extends Pos {
 		try {
 			// 데이터베이스 연결
 			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project", "root", "1234");
+
+			// 유통기한 감소 스레드 시작
+			ExpirationUpdater expirationChecker = new ExpirationUpdater(conn);
+			Thread expirationThread = new Thread(expirationChecker);
+			expirationThread.start();
 
 			boolean continueProgram = true;
 			while (continueProgram) {
@@ -129,8 +136,8 @@ public class number extends Pos {
 	private static void endProgram(Connection conn) throws SQLException {
 		// 현재 시각 가져오기
 		Pos pos = new Pos();
-
 		pos.endProgram();
+		expirationTimer.cancel(); // 타이머 종료
 	}
 
 	// 재고 초기화
@@ -355,10 +362,17 @@ public class number extends Pos {
 				rs = stmt.executeQuery(sql);
 
 				if (rs.next()) {
-					int price = rs.getInt("가격");
-					int stock = rs.getInt("재고");
+					int 가격 = rs.getInt("가격");
+					int 재고 = rs.getInt("재고");
+					int 유통기한 = rs.getInt("유통기한");
 
-					if (quantity > stock) {
+					if (유통기한 <= 0) {
+						System.out.println("유통기한이 지나 구매가 불가능한 제품입니다.");
+						returnMenu(conn);
+						break;
+					}
+
+					if (quantity > 재고) {
 						System.out.println(productId + "(이)가 품절되어 구매할 수 없습니다. 다른 제품을 구매하시겠습니까? (1. 예 | 2. 아니오)");
 						int answer = scanner.nextInt();
 						if (answer == 1) {
@@ -369,7 +383,7 @@ public class number extends Pos {
 						}
 					}
 
-					int totalAmount = price * quantity;
+					int totalAmount = 가격 * quantity;
 
 					purchases.add(new Purchase(productId, quantity)); // 구매 내역에 추가
 
@@ -389,7 +403,7 @@ public class number extends Pos {
 					revenue += totalAmount; // 매출액 증가
 
 					// 재고 업데이트
-					int newStock = stock - quantity;
+					int newStock = 재고 - quantity;
 					sql = "UPDATE items SET 재고 = " + newStock + " WHERE 제품id = '" + productId + "'";
 					stmt.executeUpdate(sql);
 
@@ -559,45 +573,43 @@ public class number extends Pos {
 
 	// 제품 입고 화면
 	private static void check5_4(Connection conn) throws SQLException {
-		// 물품 입고 화면 로직 추가, 입고 입력 시 중복 확인 검사 필요
-		// 물품이 입고되면 데이터에서 검색이 되어야 함
-		// 물품이 판매 되거나 삭제되면 데이터에서 삭제되어야 함. 검색해서 없음을 확인
-		// 이 부분은 프로젝트 요구사항에 맞게 작성하세요.
 		Scanner scanner = new Scanner(System.in);
 
 		try {
-			// 제품ID 입력
 			System.out.print("입고할 제품ID를 입력하시오 : ");
 			String productId = scanner.next();
 
-			// 입고 수량 입력
 			System.out.print("입고할 수량을 입력하시오 : ");
 			int quantity = scanner.nextInt();
 
-			// SQL 쿼리 실행을 위한 Statement 객체 생성
-			Statement stmt = conn.createStatement();
+			System.out.print("제품의 가격을 입력하시오 : ");
+			int productPrice = scanner.nextInt();
 
-			// 해당 제품ID가 이미 테이블에 존재하는지 확인하는 쿼리
+			System.out.print("유통기한(시간)을 입력하시오 : ");
+			int expiration = scanner.nextInt();
+
+			Statement stmt = conn.createStatement();
 			String checkExistQuery = "SELECT * FROM items WHERE 제품id = '" + productId + "'";
 			ResultSet existResult = stmt.executeQuery(checkExistQuery);
 
 			if (existResult.next()) {
-				// 제품이 이미 존재하는 경우, 수량을 업데이트
 				int currentStock = existResult.getInt("재고");
 				int updatedStock = currentStock + quantity;
+				int updatedExpiration = expiration;
 
-				// 제품 수량 업데이트 쿼리
-				String updateQuery = "UPDATE items SET 재고 = " + updatedStock + " WHERE 제품id = '" + productId + "'";
+				String updateQuery = "UPDATE items SET 재고 = " + updatedStock + ", 유통기한 = " + updatedExpiration
+						+ " WHERE 제품id = '" + productId + "'";
 				stmt.executeUpdate(updateQuery);
 
-				System.out.println(productId + " 제품의 재고가 " + updatedStock + "개로 업데이트되었습니다.");
+				System.out.println(
+						productId + " 제품의 재고가 " + updatedStock + "개로, 유통기한이 " + updatedExpiration + "시간으로 업데이트되었습니다.");
 				returnMenu(conn);
 			} else {
-				// 제품이 존재하지 않는 경우, 새로 추가
-				String insertQuery = "INSERT INTO items (제품id, 재고) VALUES ('" + productId + "', " + quantity + ")";
+				String insertQuery = "INSERT INTO items (제품id, 재고, 가격, 유통기한) VALUES ('" + productId + "', " + quantity
+						+ ", " + productPrice + ", " + expiration + ")";
 				stmt.executeUpdate(insertQuery);
 
-				System.out.println(productId + " 제품이 " + quantity + "개로 추가되었습니다.");
+				System.out.println(productId + " 제품이 " + quantity + "개로 추가되었습니다. 유통기한은 " + expiration + "시간입니다.");
 				returnMenu(conn);
 			}
 		} catch (SQLException e) {
