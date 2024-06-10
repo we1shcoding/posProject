@@ -208,8 +208,6 @@ public class number extends Pos {
 
 	// 매출액 체크 메서드
 	private static void check3(Connection conn) throws SQLException {
-		// 매출액 체크 로직 추가
-		// 이 부분은 프로젝트 요구사항에 맞게 작성하세요.
 		System.out.println("일일 매출액은 [" + revenue + "]원 입니다.");
 		printMenu(conn);
 	}
@@ -369,6 +367,7 @@ public class number extends Pos {
 				System.out.println("카드 번호: " + formattedCardNumber);
 
 				// 제품 가격과 재고 확인
+
 				sql = "SELECT 가격, 재고 FROM items WHERE 제품id = '" + productId + "'";
 				rs = stmt.executeQuery(sql);
 
@@ -378,7 +377,7 @@ public class number extends Pos {
 
 					if (quantity > 재고) {
 						System.out.println(
-								productId + "(이)가 품절되었거나 유통기한이 지나 구매할 수 없습니다.\n다른 제품을 구매하시겠습니까? (1. 예 | 2. 아니오)");
+								productId + "(이)가 품절되었거나 유통기한이 지나 구매할 수 없습니다" + "\n다른 제품을 구매하시겠습니까? (1. 예 | 2. 아니오)");
 						int answer = scanner.nextInt();
 						if (answer == 1) {
 							continue; // 다른 제품을 구매하기 위해 반복문을 계속 진행
@@ -442,8 +441,7 @@ public class number extends Pos {
 		StringBuilder formatted = new StringBuilder();
 		formatted.append(cardNum.substring(0, 4)).append("-");
 		formatted.append(cardNum.substring(4, 8)).append("-");
-		formatted.append(cardNum.substring(8, 12)).append("-");
-		formatted.append(cardNum.substring(12, 16));
+		formatted.append(cardNum.substring(8));
 		return formatted.toString();
 	}
 
@@ -500,6 +498,7 @@ public class number extends Pos {
 			try {
 				Statement stmt = conn.createStatement();
 				String checkStockSql = "SELECT 재고, 가격 FROM items WHERE 제품id = '" + productId + "'";
+
 				ResultSet rs = stmt.executeQuery(checkStockSql);
 
 				if (rs.next()) {

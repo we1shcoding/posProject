@@ -77,7 +77,7 @@ public class Pos {
 		// 총 매출액과 오늘 수당 계산
 		int totalmoney = (int) (elapsedTimeInMinutes * MINUTE_MONEY);
 
-		int revenue = 0; // 총 매출액을 계산하는 로직을 추가해야 합니다.
+		int revenue = 0;
 
 		// 결과 출력
 		System.out.println("프로그램이 종료되었습니다.");
