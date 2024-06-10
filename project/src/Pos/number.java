@@ -178,17 +178,18 @@ public class number extends Pos {
 			ResultSet rs = stmt.executeQuery(sql);
 
 			// 결과 출력
-			System.out.println("[현재 재고 정보]");
-			System.out.println("제품ID\t재고");
-			System.out.println("------------");
+			System.out.println("   [현재 재고 정보]");
+			System.out.println("--------------------");
+			System.out.println("제품ID\t\t재고");
+			System.out.println("--------------------");
 			while (rs.next()) {
 				// 각 열의 값을 가져옴
 				String 제품id = rs.getString("제품id");
 				int 재고 = rs.getInt("재고");
 				// 가져온 데이터 출력
-				System.out.println(제품id + "\t" + 재고 + "개");
-				System.out.println("------------");
+				System.out.printf("%-10s\t%d개\n", 제품id, 재고);
 			}
+			System.out.println("--------------------");
 
 			// 연결된 자원 닫기
 			rs.close();
@@ -236,11 +237,15 @@ public class number extends Pos {
 			}
 
 			// 가져온 데이터 출력
-			System.out.println("유통기한 정보");
+			System.out.println("======================");
+			System.out.println("   [현재 유통기한 정보]   ");
+			System.out.println("----------------------");
+			System.out.println("제품ID\t\t유통기한");
+			System.out.println("----------------------");
 			for (int i = 0; i < productIDs.size(); i++) {
-				System.out.println("제품ID: " + productIDs.get(i) + ", 유통기한: " + expirationTimes.get(i) + "시간");
+				System.out.printf("%-10s\t%3d시간\n", productIDs.get(i), expirationTimes.get(i));
 			}
-			System.out.println("");
+			System.out.println("======================");
 
 			// 연결된 자원 닫기
 			rs.close();
@@ -269,7 +274,9 @@ public class number extends Pos {
 
 		while (!isValidChoice) {
 			System.out.print("번호를 선택하세요 : ");
+
 			int choice2 = scanner.nextInt();
+			System.out.println("");
 
 			// 입력 버퍼 비우기
 			scanner.nextLine();
@@ -330,19 +337,21 @@ public class number extends Pos {
 			ResultSet rs = stmt.executeQuery(sql);
 
 			// 결과 출력
-			System.out.println("현재 제품 목록:");
+			System.out.println("======================================");
+			System.out.println("             현재 제품 목록              ");
+			System.out.println("--------------------------------------");
+			System.out.println("제품ID\t\t가격\t재고\t유통기한");
+			System.out.println("--------------------------------------");
 			while (rs.next()) {
 				// 각 열의 값을 가져옴
-
 				String 제품id = rs.getString("제품id");
 				int 가격 = rs.getInt("가격");
 				int 재고 = rs.getInt("재고");
 				int 유통기한 = rs.getInt("유통기한");
-				ArrayList<Integer> expirationTimes = new ArrayList<>();
-				expirationTimes.add(유통기한);
 				// 가져온 데이터 출력
-				System.out.println("제품ID: " + 제품id + ", 가격: " + 가격 + "원, 재고: " + 재고 + "개, 유통기한: " + 유통기한 + "시간");
+				System.out.printf("%-10s\t%d원\t%d개\t%3d시간\n", 제품id, 가격, 재고, 유통기한);
 			}
+			System.out.println("======================================");
 
 			// 여러 제품 구매 과정
 			while (true) {
