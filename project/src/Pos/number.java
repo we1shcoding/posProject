@@ -57,16 +57,17 @@ public class number extends Pos {
 
 	// 메뉴 표시
 	private static void Menu() {
-		System.out.println("--메뉴를 선택하세요--");
-		System.out.println("[1] 재고 체크");
-		System.out.println("[2] 현재 잔고 체크");
-		System.out.println("[3] 매출액");
-		System.out.println("[4] 유통기한 체크");
-		System.out.println("[5] 업무 시작");
-		System.out.println("[6] 재고, 잔고, 유통기한 초기화");
-		System.out.println("[7] 프로그램 종료");
-		System.out.println("-----------------");
-		// 사용자 선택 입력 받기
+		System.out.println(" ===============================");
+		System.out.println("/         Pos 메인 메뉴\t\t\\");
+		System.out.println("=================================");
+		System.out.println("| [1] 재고 체크\t\t\t|");
+		System.out.println("| [2] 현재 잔고 체크\t\t|");
+		System.out.println("| [3] 매출금액\t\t\t|");
+		System.out.println("| [4] 유통기한 체크\t\t\t|");
+		System.out.println("| [5] 업무 시작\t\t\t|");
+		System.out.println("| [6] 재고, 잔고, 유통기한 초기화\t|");
+		System.out.println("| [7] 프로그램 종료\t\t\t|");
+		System.out.println("=================================");
 	}
 
 	// DB 연결, 메인 메뉴 출력
@@ -255,14 +256,16 @@ public class number extends Pos {
 		Scanner scanner = new Scanner(System.in);
 		boolean isValidChoice = false;
 
-		System.out.println("----------업무를 시작합니다----------");
-		System.out.println("[5]-[1] 물건 판매");
-		System.out.println("[5]-[2] 물건 환불");
-		System.out.println("[5]-[3] 미성년자 판매 금지 물품");
-		System.out.println("[5]-[4] 물품 입고 화면");
-		System.out.println("[5]-[5] 물품 재고 및 제품 이름 검색 화면");
-		System.out.println("[5]-[6] 메인 메뉴로 돌아가기");
-		System.out.println("---------------------------------");
+		System.out.println(" ===============================");
+		System.out.println("/           업무 메뉴\t\t\\");
+		System.out.println("=================================");
+		System.out.println("| [5]-[1] 물건 판매\t\t|");
+		System.out.println("| [5]-[2] 물건 환불\t\t|");
+		System.out.println("| [5]-[3] 미성년자 판매 금지 물품\t|");
+		System.out.println("| [5]-[4] 물품 입고 화면\t\t|");
+		System.out.println("| [5]-[5] 물품 검색 화면\t\t|");
+		System.out.println("| [5]-[6] 메인 메뉴로 돌아가기\t|");
+		System.out.println("=================================");
 
 		while (!isValidChoice) {
 			System.out.print("번호를 선택하세요 : ");
@@ -298,13 +301,16 @@ public class number extends Pos {
 				break;
 			default:
 				System.out.println("잘못된 선택입니다. 다시 선택하세요.");
-				System.out.println("---------------------------------");
-				System.out.println("[5]-[1] 물건 판매");
-				System.out.println("[5]-[2] 물건 환불");
-				System.out.println("[5]-[3] 미성년자 판매 금지 물품");
-				System.out.println("[5]-[4] 물품 입고 화면");
-				System.out.println("[5]-[5] 물품 재고 및 제품 이름 검색 화면");
-				System.out.println("---------------------------------");
+				System.out.println(" ===============================");
+				System.out.println("/           업무 메뉴\t\t\\");
+				System.out.println("=================================");
+				System.out.println("| [5]-[1] 물건 판매\t\t|");
+				System.out.println("| [5]-[2] 물건 환불\t\t|");
+				System.out.println("| [5]-[3] 미성년자 판매 금지 물품\t|");
+				System.out.println("| [5]-[4] 물품 입고 화면\t\t|");
+				System.out.println("| [5]-[5] 물품 검색 화면\t\t|");
+				System.out.println("| [5]-[6] 메인 메뉴로 돌아가기\t|");
+				System.out.println("=================================");
 			}
 		}
 	}
@@ -609,8 +615,8 @@ public class number extends Pos {
 						productId + " 제품의 재고가 " + updatedStock + "개로, 유통기한이 " + updatedExpiration + "시간으로 업데이트되었습니다.");
 				returnMenu(conn);
 			} else {
-				String insertQuery = "INSERT INTO items (제품id, 재고, 가격, 유통기한) VALUES ('" + productId + "', " + quantity
-						+ ", " + productPrice + ", " + expiration + ")";
+				String insertQuery = "INSERT INTO items (제품id, 재고, 가격, 유통기한)" + "VALUES ('" + productId + "', "
+						+ quantity + ", " + productPrice + ", " + expiration + ")";
 				stmt.executeUpdate(insertQuery);
 
 				System.out.println(productId + " 제품이 " + quantity + "개로 추가되었습니다. 유통기한은 " + expiration + "시간입니다.");

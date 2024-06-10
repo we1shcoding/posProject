@@ -18,8 +18,10 @@ public class Pos {
 
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
-		System.out.println("----------금일 알바생 로그인----------");
-		System.out.print("사용자 이름을 입력하시오 : ");
+		System.out.println("===============================");
+		System.out.println("       오늘의 알바생 로그인        ");
+		System.out.println("===============================");
+		System.out.print("사용자 이름을 입력하세요 : ");
 		String userName = sc.nextLine();
 		System.out.println("입력한 사용자 이름: " + userName);
 
@@ -29,6 +31,8 @@ public class Pos {
 			userPin = sc.nextLine();
 			if (userPin.equals("1234")) {
 				System.out.println("입력한 비밀번호 : " + userPin);
+
+				System.out.println("로그인 성공! 환영합니다, " + userName + "님!");
 
 				System.out.println(userName + " 알바생이 출근하였습니다.");
 				// 출근 시간 기록
@@ -43,13 +47,14 @@ public class Pos {
 
 				break;
 			} else {
-				System.out.println("올바른 비밀번호가 아닙니다. 다시 입력해주세요.");
+				System.out.println("비밀번호가 올바르지 않습니다. 다시 입력해주세요.");
 			}
 		}
 
 		// 프로그램 종료를 위한 입력 대기
-		System.out.println("아르바이트를 시작합니다.");
-		System.out.println("----------------------------------\n");
+		System.out.println("================================");
+		System.out.println("       아르바이트를 시작합니다.        ");
+		System.out.println("--------------------------------\n");
 	}
 
 	protected static void startWageCalculation() {
