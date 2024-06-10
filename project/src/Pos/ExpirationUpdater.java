@@ -43,6 +43,7 @@ public class ExpirationUpdater implements Runnable {
 			} else {
 				// 연결이 닫혀 있을 경우 적절한 처리를 수행
 				System.out.println("데이터베이스 연결이 닫혀 있습니다.");
+				// 외부에서 새로운 연결을 주입받거나 다른 대안을 고려해야 합니다.
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -31,11 +31,9 @@ public class Pos {
 				System.out.println("입력한 비밀번호 : " + userPin);
 
 				System.out.println(userName + " 알바생이 출근하였습니다.");
-
 				// 출근 시간 기록
 				startTime = LocalDateTime.now();
 				LoginTime = startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-//            System.out.println("로그인 성공 시간 : " + LoginTime);
 
 				// 기본 잔고 출력
 				System.out.println("기본 잔고 : " + balance + "원");
